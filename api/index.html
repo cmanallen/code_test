@@ -33,14 +33,18 @@
 			render: function() {
 				var count = 0,
 					balance = this.props.principal,
-					interest = this.calculateInterestPayment();
+					interest = this.calculateInterestPayment(),
+					rate = this.props.rate;
 				
 				var payments = this.props.payments.sort(function(a, b) {
 					return new Date(a.created) - new Date(b.created);
 				}).map(function(payment) {
 					var principal = payment['amount'] - interest,
 						new_balance = balance - principal;
-						balance = new_balance;
+					
+					balance = new_balance;
+					interest = Math.round(balance * ((rate / 100)/12));
+
 					return (
 						<Payment
 							count={count++}
@@ -109,6 +113,19 @@
 				return (
 					<div>
 						{loans}
+						<hr />
+						<h3>New Loan</h3>
+						<div>
+							<label>Title: </label>
+							<input type="text" name="title" /><br />
+							<label>Principal: </label>
+							<input type="number" name="principal" /><br />
+							<label>Interest Rate: </label>
+							<input type="number" name="interest_rate" /><br />
+							<label>Length: </label>
+							<input type="number" name="length" /><br />
+							<button type="submit" className="submit-loan">Submit</button>
+						</div>
 					</div>
 				)
 			},
@@ -121,6 +138,8 @@
 		// End React.  Django AJAX Stuff below.
 		// Kind of sloppy...and really should be part of react
 		// for automatic dom diff/reload.
+
+
 
 		function getCookie(name) {
 			var cookieValue = null;
@@ -152,18 +171,28 @@
 		});
 
 		$('.submit-payment').on('click', function() {
-			var form_data = {};
-			form_data['csrfmiddlewaretoken'] = csrftoken;
-			$.each($(this).parent().find('input'), function() {
-				form_data[$(this).attr('name')] = $(this).val();
-			});
-			async(form_data);
+			form_data = buildForm($(this).parent().find('input'));
+			async(form_data, "http://localhost:8000/api/v1/payment/");
 		});
 
-		function async(form_data) {
+		$('.submit-loan').on('click', function() {
+			form_data = buildForm($(this).parent().find('input'));
+			async(form_data, "http://localhost:8000/api/v1/loan/");
+		});
+
+		function buildForm(dom_nodes) {
+			var form_data = {};
+			form_data['csrfmiddlewaretoken'] = csrftoken;
+			$.each(dom_nodes, function() {
+				form_data[$(this).attr('name')] = $(this).val();
+			});
+			return form_data;
+		}
+
+		function async(form_data, action) {
 			$.ajax({
 				type: "POST",
-				url: "http://localhost:8000/api/v1/payment/",
+				url: action,
 				datatype: "json",
 				async: true,
 				data: form_data,
