@@ -33,12 +33,14 @@
 			render: function() {
 				var count = 0,
 					balance = this.props.principal,
-					interest = this.calculateInterestPayment(),
-					payments = this.props.payments.sort(function(a, b) {
+					interest = this.calculateInterestPayment();
+				
+				var payments = this.props.payments.sort(function(a, b) {
 					return new Date(a.created) - new Date(b.created);
 				}).map(function(payment) {
 					var principal = payment['amount'] - interest,
 						new_balance = balance - principal;
+						balance = new_balance;
 					return (
 						<Payment
 							count={count++}
@@ -49,6 +51,7 @@
 						/>
 					)
 				});
+
 				return (
 					<div>
 						<h3>Loan Name: {this.props.title}</h3>
@@ -120,32 +123,32 @@
 		// for automatic dom diff/reload.
 
 		function getCookie(name) {
-		    var cookieValue = null;
-		    if (document.cookie && document.cookie != '') {
-		        var cookies = document.cookie.split(';');
-		        for (var i = 0; i < cookies.length; i++) {
-		            var cookie = jQuery.trim(cookies[i]);
-		            // Does this cookie string begin with the name we want?
-		            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-		                break;
-		            }
-		        }
-		    }
-		    return cookieValue;
+			var cookieValue = null;
+			if (document.cookie && document.cookie != '') {
+				var cookies = document.cookie.split(';');
+				for (var i = 0; i < cookies.length; i++) {
+					var cookie = jQuery.trim(cookies[i]);
+					// Does this cookie string begin with the name we want?
+					if (cookie.substring(0, name.length + 1) == (name + '=')) {
+						cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
 		}
 		var csrftoken = getCookie('csrftoken');
 
 		function csrfSafeMethod(method) {
-		    // these HTTP methods do not require CSRF protection
-		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+			// these HTTP methods do not require CSRF protection
+			return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 		}
 		$.ajaxSetup({
-		    beforeSend: function(xhr, settings) {
-		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-		        }
-		    }
+			beforeSend: function(xhr, settings) {
+				if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+					xhr.setRequestHeader("X-CSRFToken", csrftoken);
+				}
+			}
 		});
 
 		$('.submit-payment').on('click', function() {

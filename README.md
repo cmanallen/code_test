@@ -20,7 +20,7 @@ Create a virtual environment (pyvenv env_name)  and `pip install -r requirements
 
 Folders are loosely named after the task they're associated with:
 
-* word_count performs task 1.
-* financier is the RESTful API Backend of task 2.
-* api is the consumer of financier for task 2/3.
-* ajax performs task 4.
+* Task 1: `counter` function in `word_count` module.
+* Task 2: `financier` is the RESTful API Backend.
+* Task 3: `api/index.html` is the consumer.
+* Task 4: ajax form submission in `api/index.html` 
