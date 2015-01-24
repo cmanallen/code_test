@@ -12,6 +12,7 @@ On a Mac?  Try using `pyenv` to set a local environment (pyenv local 3.4.1).  Yo
 
 ####Running the API
 
+* In the repo root: `source ./env_name/bin/activate`
 * Change directory into `financier`.
 * With your environment active, `./manage.py runserver --settings=financier.settings.base`.
 	* The RESTful API service is now running.
