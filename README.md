@@ -10,6 +10,12 @@ Linux installations should default to Python 3.  If you're runnig an LTS, try in
 
 Create a virtual environment (pyvenv env_name)  and `pip install -r requirements.txt`.
 
+####Running the api
+
+* In your environment, `./manage.py runserver --settings=financier.settings.base`.
+* On the command line: (linux) chromium --disable-web-security or whatever you have aliased as your browser.
+* Open `index.html` in the `api` folder in your Chrome browser.
+
 ####Tasks
 
 Folders are loosely named after the task they're associated with:

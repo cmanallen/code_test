@@ -1,0 +1,174 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<!-- Scripts -->
+	<script src="http://fb.me/react-0.12.2.js"></script>
+	<script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+	<script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+</head>
+<body>
+	<script type="text/jsx">
+		// Normally, the React components would have their own file
+
+		var Payment = React.createClass({
+			render: function() {
+				return (
+					<tr>
+						<td>{this.props.count}</td>
+						<td>{this.props.amount}</td>
+						<td>{this.props.interest}</td>
+						<td>{this.props.principal}</td>
+						<td>{this.props.balance}</td>
+					</tr>
+				)
+			},
+		});
+
+		var Loan = React.createClass({
+			calculateInterestPayment: function() {
+				var payment = ((this.props.rate / 100)/12) * this.props.principal;
+				return payment;
+			},
+			render: function() {
+				var count = 0,
+					balance = this.props.principal,
+					interest = this.calculateInterestPayment(),
+					payments = this.props.payments.sort(function(a, b) {
+					return new Date(a.created) - new Date(b.created);
+				}).map(function(payment) {
+					var principal = payment['amount'] - interest,
+						new_balance = balance - principal;
+					return (
+						<Payment
+							count={count++}
+							amount={payment['amount']}
+							interest={interest}
+							principal={principal}
+							balance={new_balance}
+						/>
+					)
+				});
+				return (
+					<div>
+						<h3>Loan Name: {this.props.title}</h3>
+						<table>
+							<thead>
+								<tr>
+									<th>Month</th>
+									<th>Payment</th>
+									<th>Interest</th>
+									<th>Principal</th>
+									<th>Balance</th>
+								</tr>
+							</thead>
+							<tbody>
+								{payments}
+							</tbody>
+						</table>
+						<div>
+							<label>Amount: </label>
+							<input type="hidden" name="loan" value={this.props.id} />
+							<input type="number" name="amount" />
+							<button type="submit" className="submit-payment">Submit</button>
+						</div>
+					</div>
+				)
+			},
+		});
+
+		var App = React.createClass({
+			fetch: function() {
+				var Data = null;
+				$.ajax({
+					url: 'http://localhost:8000/api/v1/loan/',
+					method: 'GET',
+					async: false,
+					success: function(results) {
+						Data = results;
+					},
+				});
+				return Data;
+			},
+			render: function() {
+				var loans = this.fetch().map(function(loan) {
+					return (
+						<Loan
+							id={loan['id']}
+							title={loan['title']}
+							principal={loan['principal']}
+							rate={loan['interest_rate']}
+							length={loan['length']}
+							payments={loan['payments']}
+						/>
+					)
+				});
+				return (
+					<div>
+						{loans}
+					</div>
+				)
+			},
+		});
+
+		React.render(<App />, document.body);
+
+
+
+		// End React.  Django AJAX Stuff below.
+		// Kind of sloppy...and really should be part of react
+		// for automatic dom diff/reload.
+
+		function getCookie(name) {
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie != '') {
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) {
+		            var cookie = jQuery.trim(cookies[i]);
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+		}
+		var csrftoken = getCookie('csrftoken');
+
+		function csrfSafeMethod(method) {
+		    // these HTTP methods do not require CSRF protection
+		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+		}
+		$.ajaxSetup({
+		    beforeSend: function(xhr, settings) {
+		        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+		            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		        }
+		    }
+		});
+
+		$('.submit-payment').on('click', function() {
+			var form_data = {};
+			form_data['csrfmiddlewaretoken'] = csrftoken;
+			$.each($(this).parent().find('input'), function() {
+				form_data[$(this).attr('name')] = $(this).val();
+			});
+			async(form_data);
+		});
+
+		function async(form_data) {
+			$.ajax({
+				type: "POST",
+				url: "http://localhost:8000/api/v1/payment/",
+				datatype: "json",
+				async: true,
+				data: form_data,
+				success: function(data) {
+					console.log(data);
+				},
+			});
+		};
+	</script>
+</body>
+</html>

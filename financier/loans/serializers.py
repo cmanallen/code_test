@@ -5,7 +5,7 @@ from rest_framework.serializers import (
 from .models import Loan, Payment
 
 
-class PaymentSerializer(models.ModelSerializer):
+class PaymentSerializer(ModelSerializer):
 	"""
 	Returns serialized Payment model
 	"""
@@ -14,7 +14,7 @@ class PaymentSerializer(models.ModelSerializer):
 		fields = ('id', 'loan', 'amount', 'created')
 
 
-class LoanSerializer(models.HyperlinkedModelSerializer):
+class LoanSerializer(HyperlinkedModelSerializer):
 
 	payments = PaymentSerializer(many=True, read_only=True)
 
